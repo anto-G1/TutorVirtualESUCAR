@@ -31,6 +31,7 @@ import cl.duoc.tutorvirtual.ui.screens.HitosScreen
 import cl.duoc.tutorvirtual.data.model.Hito
 import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 import kotlinx.coroutines.launch
+import cl.duoc.tutorvirtual.ui.screens.FaqScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -180,6 +181,15 @@ fun TutorVirtualApp() {
             }
 
 
+
+            "Preguntas frecuentes" -> {
+                FaqScreen(
+                    modifier = Modifier.padding(padding),
+                    onVolver = {
+                        pantalla = "Inicio"
+                    }
+                )
+            }
 
             else -> {
 
