@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cl.duoc.tutorvirtual.ui.components.FaqScreen
 import cl.duoc.tutorvirtual.ui.screens.HitosScreen
 
 class MainActivity : ComponentActivity() {
@@ -108,6 +109,15 @@ fun TutorVirtualApp() {
 
                 HitosScreen(
                     modifier = Modifier.padding(padding)
+                )
+            }
+
+            "Preguntas frecuentes" -> {
+                FaqScreen(
+                    modifier = Modifier.padding(padding),
+                    onVolver = {
+                        pantalla = "Inicio"
+                    }
                 )
             }
 
