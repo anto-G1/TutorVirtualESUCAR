@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -39,11 +39,13 @@ import cl.duoc.tutorvirtual.data.model.Hito
 import cl.duoc.tutorvirtual.data.remote.ContenidoRemoto
 import cl.duoc.tutorvirtual.data.remote.RetrofitClient
 import cl.duoc.tutorvirtual.data.repository.ContenidoRepository
+import cl.duoc.tutorvirtual.ui.components.AccessibleButton
 import cl.duoc.tutorvirtual.ui.components.FaqScreen
 import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 import cl.duoc.tutorvirtual.ui.screens.HitosScreen
-import cl.duoc.tutorvirtual.ui.viewmodel.HitoEstadoViewModel
+import cl.duoc.tutorvirtual.ui.theme.TutorVirtualESUCARTheme
 import cl.duoc.tutorvirtual.utils.NetworkUtils
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
+            TutorVirtualESUCARTheme {
                 TutorVirtualApp()
             }
         }
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TutorVirtualApp() {
+val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val contenidoRepository = remember(context) {
@@ -133,25 +136,18 @@ fun TutorVirtualApp() {
 
     LaunchedEffect(hayInternet) {
         if (hayInternet) {
-            mensajeSincronizacion =
-                "Actualizando contenido..."
+            mensajeSincronizacion = "Actualizando contenido..."
 
-            val resultado =
-                contenidoRepository.sincronizar()
+            val resultado = contenidoRepository.sincronizar()
 
-            mensajeSincronizacion =
-                if (resultado.isSuccess) {
-                    contenidoActual =
-                        resultado.getOrThrow()
-                    versionContenido =
-                        contenidoActual!!.version
-                    fechaActualizacion =
-                        contenidoActual!!.fechaActualizacion
-                    "Contenido sincronizado"
-                } else {
-                    "Error al actualizar. " +
-                            "Contenido local disponible."
-                }
+            mensajeSincronizacion = if (resultado.isSuccess) {
+                contenidoActual = resultado.getOrThrow()
+                versionContenido = contenidoActual!!.version
+                fechaActualizacion = contenidoActual!!.fechaActualizacion
+                "Contenido sincronizado"
+            } else {
+                "Error al actualizar. Contenido local disponible."
+            }
         } else {
             mensajeSincronizacion =
                 "Sin conexión. Contenido local disponible."
@@ -162,33 +158,25 @@ fun TutorVirtualApp() {
         EstadoEntregableDataStore(context)
     }
 
-    val hitosConEstado =
-        HitosLocalDataSource.hitos.map { hito ->
-            val guiaActualizada =
-                contenidoActual?.guias?.find {
-                    it.id == hito.id
-                }
-
-            val estadoGuardado by estadoDataStore
-                .obtenerEstado(hito.id)
-                .collectAsState(initial = hito.estado)
-
-            hito.copy(
-                titulo =
-                    guiaActualizada?.titulo
-                        ?: hito.titulo,
-                descripcion =
-                    guiaActualizada?.descripcion
-                        ?: hito.descripcion,
-                formatoRequerido =
-                    guiaActualizada?.formatoRequerido
-                        ?: hito.formatoRequerido,
-                fechaLimite =
-                    guiaActualizada?.fechaLimite
-                        ?: hito.fechaLimite,
-                estado = estadoGuardado
-            )
+    val hitosConEstado = HitosLocalDataSource.hitos.map { hito ->
+        val guiaActualizada = contenidoActual?.guias?.find {
+            it.id == hito.id
         }
+
+        val estadoGuardado by estadoDataStore
+            .obtenerEstado(hito.id)
+            .collectAsState(initial = hito.estado)
+
+        hito.copy(
+            titulo = guiaActualizada?.titulo ?: hito.titulo,
+            descripcion = guiaActualizada?.descripcion ?: hito.descripcion,
+            formatoRequerido = guiaActualizada?.formatoRequerido
+                ?: hito.formatoRequerido,
+            fechaLimite = guiaActualizada?.fechaLimite
+                ?: hito.fechaLimite,
+            estado = estadoGuardado
+        )
+    }
 
     var pantalla by remember {
         mutableStateOf("Inicio")
@@ -200,46 +188,40 @@ fun TutorVirtualApp() {
 
     BackHandler(enabled = pantalla != "Inicio") {
         when (pantalla) {
-            "Detalle" -> {
-                pantalla = "Guía metodológica"
-            }
-
-            else -> {
-                pantalla = "Inicio"
-            }
+            "Detalle" -> pantalla = "Guía metodológica"
+            else -> pantalla = "Inicio"
         }
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Surface(
+                color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 3.dp
             ) {
                 Column {
                     Text(
                         text = "Tutor Virtual ESUCAR",
-                        style =
-                            MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                     )
 
                     Text(
-                        text =
-                            if (hayInternet) {
-                                "● Con conexión"
-                            } else {
-                                "● Sin conexión"
-                            },
-                        color =
-                            if (hayInternet) {
-                                Color(0xFF2E7D32)
-                            } else {
-                                Color(0xFFC62828)
-                            },
-                        style =
-                            MaterialTheme.typography.labelMedium,
+                        text = if (hayInternet) {
+                            "● Con conexión"
+                        } else {
+                            "● Sin conexión"
+                        },
+                        color = if (hayInternet) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        },
+                        style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -248,8 +230,8 @@ fun TutorVirtualApp() {
 
                     Text(
                         text = mensajeSincronizacion,
-                        style =
-                            MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -257,11 +239,9 @@ fun TutorVirtualApp() {
                     )
 
                     Text(
-                        text =
-                            "Versión del contenido: " +
-                                    versionContenido,
-                        style =
-                            MaterialTheme.typography.labelSmall,
+                        text = "Versión del contenido: $versionContenido",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -269,11 +249,9 @@ fun TutorVirtualApp() {
                     )
 
                     Text(
-                        text =
-                            "Fecha de actualización: " +
-                                    fechaActualizacion,
-                        style =
-                            MaterialTheme.typography.labelSmall,
+                        text = "Fecha de actualización: $fechaActualizacion",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -283,6 +261,7 @@ fun TutorVirtualApp() {
             }
         }
     ) { padding ->
+
         when (pantalla) {
             "Inicio" -> {
                 Column(
@@ -294,18 +273,15 @@ fun TutorVirtualApp() {
                         Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text =
-                            "Bienvenido al Tutor Virtual",
-                        style =
-                            MaterialTheme
-                                .typography
-                                .headlineSmall
+                        text = "Bienvenido al Tutor Virtual",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
-                        text =
-                            "Apoyo para Trabajo de " +
-                                    "Título I, II y III."
+                        text = "Apoyo para Trabajo de Título I, II y III.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     listOf(
@@ -314,15 +290,12 @@ fun TutorVirtualApp() {
                         "Mis avances",
                         "Mi perfil"
                     ).forEach { destino ->
-                        Button(
+                        AccessibleButton(
+                            text = destino,
                             onClick = {
                                 pantalla = destino
-                            },
-                            modifier =
-                                Modifier.fillMaxWidth()
-                        ) {
-                            Text(destino)
-                        }
+                            }
+                        )
                     }
                 }
             }
@@ -378,9 +351,8 @@ fun TutorVirtualApp() {
                     onVolver = {
                         pantalla = "Inicio"
                     },
-                    preguntasRemotas =
-                        contenidoActual
-                            ?.preguntasFrecuentes
+                    preguntasRemotas = contenidoActual
+                        ?.preguntasFrecuentes
                 )
             }
 
@@ -395,22 +367,21 @@ fun TutorVirtualApp() {
                 ) {
                     Text(
                         text = pantalla,
-                        style =
-                            MaterialTheme
-                                .typography
-                                .headlineMedium
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
-                        text =
-                            "Módulo preparado para " +
-                                    "próximas actividades."
+                        text = "Módulo preparado para próximas actividades.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     OutlinedButton(
                         onClick = {
                             pantalla = "Inicio"
-                        }
+                        },
+                        modifier = Modifier.heightIn(min = 48.dp)
                     ) {
                         Text("Volver al inicio")
                     }
