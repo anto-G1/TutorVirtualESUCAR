@@ -1,12 +1,12 @@
 
 {
-  "version": 1,
+  "version": 2,
   "fechaActualizacion": "2026-11-12",
   "guias": [
     {
       "id": 1,
       "titulo": "Planteamiento",
-      "descripcion": "Define el problema, los objetivos y el propósito del trabajo.",
+      "descripcion": ""descripcion": "Define el problema de investigación, establece los objetivos generales y específicos y explica el propósito del trabajo de título.",",
       "formatoRequerido": "Por definir",
       "fechaLimite": "Por definir"
     },
