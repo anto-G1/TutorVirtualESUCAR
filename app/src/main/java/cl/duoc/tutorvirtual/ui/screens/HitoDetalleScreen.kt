@@ -219,7 +219,8 @@ fun HitoDetalleScreen(
 
         Text(
             text = "Estado del entregable",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         ExposedDropdownMenuBox(
@@ -294,6 +295,7 @@ fun HitoDetalleScreen(
                     text = uiState.mensaje.orEmpty(),
                     color =
                         MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -453,6 +455,7 @@ fun HitoDetalleScreen(
             text = "Fecha del contenido: ${hito.fechaLimite}",
             style = MaterialTheme.typography.bodyMedium
         )
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = onVolver
