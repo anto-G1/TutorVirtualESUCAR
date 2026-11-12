@@ -27,11 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.tutorvirtual.data.local.EstadoEntregableDataStore
 import cl.duoc.tutorvirtual.data.local.HitosLocalDataSource
 import cl.duoc.tutorvirtual.data.model.Hito
@@ -43,8 +43,8 @@ import cl.duoc.tutorvirtual.ui.components.FaqScreen
 import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 import cl.duoc.tutorvirtual.ui.screens.HitosScreen
 import cl.duoc.tutorvirtual.ui.theme.TutorVirtualESUCARTheme
+import cl.duoc.tutorvirtual.ui.viewmodel.HitoEstadoViewModel
 import cl.duoc.tutorvirtual.utils.NetworkUtils
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -61,7 +61,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TutorVirtualApp() {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val contenidoRepository = remember(context) {
@@ -80,22 +79,26 @@ fun TutorVirtualApp() {
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
 
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                hayInternet = NetworkUtils.hayConexion(context)
-            }
+        val callback =
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
 
-            override fun onLost(network: Network) {
-                hayInternet = NetworkUtils.hayConexion(context)
-            }
+                override fun onLost(network: Network) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
 
-            override fun onCapabilitiesChanged(
-                network: Network,
-                capabilities: NetworkCapabilities
-            ) {
-                hayInternet = NetworkUtils.hayConexion(context)
+                override fun onCapabilitiesChanged(
+                    network: Network,
+                    capabilities: NetworkCapabilities
+                ) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
             }
-        }
 
         manager.registerDefaultNetworkCallback(callback)
 
@@ -121,29 +124,39 @@ fun TutorVirtualApp() {
     }
 
     LaunchedEffect(Unit) {
-        val contenidoLocal = contenidoRepository.obtenerLocal()
+        val contenidoLocal =
+            contenidoRepository.obtenerLocal()
 
         contenidoActual = contenidoLocal
         versionContenido = contenidoLocal.version
-        fechaActualizacion = contenidoLocal.fechaActualizacion
+        fechaActualizacion =
+            contenidoLocal.fechaActualizacion
     }
 
     LaunchedEffect(hayInternet) {
         if (hayInternet) {
-            mensajeSincronizacion = "Actualizando contenido..."
+            mensajeSincronizacion =
+                "Actualizando contenido..."
 
-            val resultado = contenidoRepository.sincronizar()
+            val resultado =
+                contenidoRepository.sincronizar()
 
-            mensajeSincronizacion = if (resultado.isSuccess) {
-                contenidoActual = resultado.getOrThrow()
-                versionContenido = contenidoActual!!.version
-                fechaActualizacion = contenidoActual!!.fechaActualizacion
-                "Contenido sincronizado"
-            } else {
-                "Error al actualizar. Contenido local disponible."
-            }
+            mensajeSincronizacion =
+                if (resultado.isSuccess) {
+                    contenidoActual =
+                        resultado.getOrThrow()
+                    versionContenido =
+                        contenidoActual!!.version
+                    fechaActualizacion =
+                        contenidoActual!!.fechaActualizacion
+                    "Contenido sincronizado"
+                } else {
+                    "Error al actualizar. " +
+                            "Contenido local disponible."
+                }
         } else {
-            mensajeSincronizacion = "Sin conexión. Contenido local disponible."
+            mensajeSincronizacion =
+                "Sin conexión. Contenido local disponible."
         }
     }
 
@@ -151,25 +164,33 @@ fun TutorVirtualApp() {
         EstadoEntregableDataStore(context)
     }
 
-    val hitosConEstado = HitosLocalDataSource.hitos.map { hito ->
-        val guiaActualizada = contenidoActual?.guias?.find {
-            it.id == hito.id
+    val hitosConEstado =
+        HitosLocalDataSource.hitos.map { hito ->
+            val guiaActualizada =
+                contenidoActual?.guias?.find {
+                    it.id == hito.id
+                }
+
+            val estadoGuardado by estadoDataStore
+                .obtenerEstado(hito.id)
+                .collectAsState(initial = hito.estado)
+
+            hito.copy(
+                titulo =
+                    guiaActualizada?.titulo
+                        ?: hito.titulo,
+                descripcion =
+                    guiaActualizada?.descripcion
+                        ?: hito.descripcion,
+                formatoRequerido =
+                    guiaActualizada?.formatoRequerido
+                        ?: hito.formatoRequerido,
+                fechaLimite =
+                    guiaActualizada?.fechaLimite
+                        ?: hito.fechaLimite,
+                estado = estadoGuardado
+            )
         }
-
-        val estadoGuardado by estadoDataStore
-            .obtenerEstado(hito.id)
-            .collectAsState(initial = hito.estado)
-
-        hito.copy(
-            titulo = guiaActualizada?.titulo ?: hito.titulo,
-            descripcion = guiaActualizada?.descripcion ?: hito.descripcion,
-            formatoRequerido = guiaActualizada?.formatoRequerido
-                ?: hito.formatoRequerido,
-            fechaLimite = guiaActualizada?.fechaLimite
-                ?: hito.fechaLimite,
-            estado = estadoGuardado
-        )
-    }
 
     var pantalla by remember {
         mutableStateOf("Inicio")
@@ -181,40 +202,62 @@ fun TutorVirtualApp() {
 
     BackHandler(enabled = pantalla != "Inicio") {
         when (pantalla) {
-            "Detalle" -> pantalla = "Guía metodológica"
-            else -> pantalla = "Inicio"
+            "Detalle" -> {
+                pantalla = "Guía metodológica"
+            }
+
+            else -> {
+                pantalla = "Inicio"
+            }
         }
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor =
+            MaterialTheme.colorScheme.background,
         topBar = {
             Surface(
-                color = MaterialTheme.colorScheme.surface,
+                color =
+                    MaterialTheme.colorScheme.surface,
                 tonalElevation = 3.dp
             ) {
                 Column {
                     Text(
                         text = "Tutor Virtual ESUCAR",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .titleLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                     )
 
                     Text(
-                        text = if (hayInternet) {
-                            "● Con conexión"
-                        } else {
-                            "● Sin conexión"
-                        },
-                        color = if (hayInternet) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
-                        style = MaterialTheme.typography.labelMedium,
+                        text =
+                            if (hayInternet) {
+                                "● Con conexión"
+                            } else {
+                                "● Sin conexión"
+                            },
+                        color =
+                            if (hayInternet) {
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary
+                            } else {
+                                MaterialTheme
+                                    .colorScheme
+                                    .error
+                            },
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelMedium,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -223,8 +266,14 @@ fun TutorVirtualApp() {
 
                     Text(
                         text = mensajeSincronizacion,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -232,9 +281,17 @@ fun TutorVirtualApp() {
                     )
 
                     Text(
-                        text = "Versión del contenido: $versionContenido",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text =
+                            "Versión del contenido: " +
+                                    versionContenido,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -242,9 +299,17 @@ fun TutorVirtualApp() {
                     )
 
                     Text(
-                        text = "Fecha de actualización: $fechaActualizacion",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text =
+                            "Fecha de actualización: " +
+                                    fechaActualizacion,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -262,18 +327,34 @@ fun TutorVirtualApp() {
                         .padding(padding)
                         .fillMaxSize()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Bienvenido al Tutor Virtual",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Bienvenido al Tutor Virtual",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .headlineSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     Text(
-                        text = "Apoyo para Trabajo de Título I, II y III.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Apoyo para Trabajo de " +
+                                    "Título I, II y III.",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     listOf(
@@ -294,7 +375,8 @@ fun TutorVirtualApp() {
 
             "Guía metodológica" -> {
                 HitosScreen(
-                    modifier = Modifier.padding(padding),
+                    modifier =
+                        Modifier.padding(padding),
                     hitos = hitosConEstado,
                     onHitoClick = { hito ->
                         hitoSeleccionado = hito
@@ -305,36 +387,46 @@ fun TutorVirtualApp() {
 
             "Detalle" -> {
                 hitoSeleccionado?.let { hito ->
-                    val hitoActualizado = hitosConEstado.find {
-                        it.id == hito.id
-                    } ?: hito
+                    val hitoActualizado =
+                        hitosConEstado.find {
+                            it.id == hito.id
+                        } ?: hito
+
+                    val estadoViewModel:
+                            HitoEstadoViewModel = viewModel(
+                        key =
+                            "estado_hito_${hito.id}",
+                        factory =
+                            HitoEstadoViewModel.Factory(
+                                idHito = hito.id,
+                                dataStore =
+                                    estadoDataStore
+                            )
+                    )
 
                     HitoDetalleScreen(
                         hito = hitoActualizado,
+                        viewModel = estadoViewModel,
                         onVolver = {
-                            pantalla = "Guía metodológica"
+                            pantalla =
+                                "Guía metodológica"
                         },
-                        onCambiarEstado = { nuevoEstado ->
-                            scope.launch {
-                                estadoDataStore.guardarEstado(
-                                    hito.id,
-                                    nuevoEstado
-                                )
-                            }
-                        },
-                        modifier = Modifier.padding(padding)
+                        modifier =
+                            Modifier.padding(padding)
                     )
                 }
             }
 
             "Preguntas frecuentes" -> {
                 FaqScreen(
-                    modifier = Modifier.padding(padding),
+                    modifier =
+                        Modifier.padding(padding),
                     onVolver = {
                         pantalla = "Inicio"
                     },
-                    preguntasRemotas = contenidoActual
-                        ?.preguntasFrecuentes
+                    preguntasRemotas =
+                        contenidoActual
+                            ?.preguntasFrecuentes
                 )
             }
 
@@ -344,25 +436,41 @@ fun TutorVirtualApp() {
                         .padding(padding)
                         .fillMaxSize()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
                         text = pantalla,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onBackground
+                        style =
+                            MaterialTheme
+                                .typography
+                                .headlineMedium,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     Text(
-                        text = "Módulo preparado para próximas actividades.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Módulo preparado para " +
+                                    "próximas actividades.",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     OutlinedButton(
                         onClick = {
                             pantalla = "Inicio"
                         },
-                        modifier = Modifier.heightIn(min = 48.dp)
+                        modifier =
+                            Modifier.heightIn(min = 48.dp)
                     ) {
                         Text("Volver al inicio")
                     }
