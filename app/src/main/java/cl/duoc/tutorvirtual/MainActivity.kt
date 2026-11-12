@@ -44,8 +44,8 @@ import cl.duoc.tutorvirtual.ui.components.FaqScreen
 import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 import cl.duoc.tutorvirtual.ui.screens.HitosScreen
 import cl.duoc.tutorvirtual.ui.theme.TutorVirtualESUCARTheme
+import cl.duoc.tutorvirtual.ui.viewmodel.HitoEstadoViewModel
 import cl.duoc.tutorvirtual.utils.NetworkUtils
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -126,7 +126,8 @@ val scope = rememberCoroutineScope()
     }
 
     LaunchedEffect(Unit) {
-        val contenidoLocal = contenidoRepository.obtenerLocal()
+        val contenidoLocal =
+            contenidoRepository.obtenerLocal()
 
         contenidoActual = contenidoLocal
         versionContenido = contenidoLocal.version
@@ -136,18 +137,25 @@ val scope = rememberCoroutineScope()
 
     LaunchedEffect(hayInternet) {
         if (hayInternet) {
-            mensajeSincronizacion = "Actualizando contenido..."
+            mensajeSincronizacion =
+                "Actualizando contenido..."
 
-            val resultado = contenidoRepository.sincronizar()
+            val resultado =
+                contenidoRepository.sincronizar()
 
-            mensajeSincronizacion = if (resultado.isSuccess) {
-                contenidoActual = resultado.getOrThrow()
-                versionContenido = contenidoActual!!.version
-                fechaActualizacion = contenidoActual!!.fechaActualizacion
-                "Contenido sincronizado"
-            } else {
-                "Error al actualizar. Contenido local disponible."
-            }
+            mensajeSincronizacion =
+                if (resultado.isSuccess) {
+                    contenidoActual =
+                        resultado.getOrThrow()
+                    versionContenido =
+                        contenidoActual!!.version
+                    fechaActualizacion =
+                        contenidoActual!!.fechaActualizacion
+                    "Contenido sincronizado"
+                } else {
+                    "Error al actualizar. " +
+                            "Contenido local disponible."
+                }
         } else {
             mensajeSincronizacion =
                 "Sin conexión. Contenido local disponible."
@@ -158,25 +166,33 @@ val scope = rememberCoroutineScope()
         EstadoEntregableDataStore(context)
     }
 
-    val hitosConEstado = HitosLocalDataSource.hitos.map { hito ->
-        val guiaActualizada = contenidoActual?.guias?.find {
-            it.id == hito.id
+    val hitosConEstado =
+        HitosLocalDataSource.hitos.map { hito ->
+            val guiaActualizada =
+                contenidoActual?.guias?.find {
+                    it.id == hito.id
+                }
+
+            val estadoGuardado by estadoDataStore
+                .obtenerEstado(hito.id)
+                .collectAsState(initial = hito.estado)
+
+            hito.copy(
+                titulo =
+                    guiaActualizada?.titulo
+                        ?: hito.titulo,
+                descripcion =
+                    guiaActualizada?.descripcion
+                        ?: hito.descripcion,
+                formatoRequerido =
+                    guiaActualizada?.formatoRequerido
+                        ?: hito.formatoRequerido,
+                fechaLimite =
+                    guiaActualizada?.fechaLimite
+                        ?: hito.fechaLimite,
+                estado = estadoGuardado
+            )
         }
-
-        val estadoGuardado by estadoDataStore
-            .obtenerEstado(hito.id)
-            .collectAsState(initial = hito.estado)
-
-        hito.copy(
-            titulo = guiaActualizada?.titulo ?: hito.titulo,
-            descripcion = guiaActualizada?.descripcion ?: hito.descripcion,
-            formatoRequerido = guiaActualizada?.formatoRequerido
-                ?: hito.formatoRequerido,
-            fechaLimite = guiaActualizada?.fechaLimite
-                ?: hito.fechaLimite,
-            estado = estadoGuardado
-        )
-    }
 
     var pantalla by remember {
         mutableStateOf("Inicio")
@@ -188,40 +204,62 @@ val scope = rememberCoroutineScope()
 
     BackHandler(enabled = pantalla != "Inicio") {
         when (pantalla) {
-            "Detalle" -> pantalla = "Guía metodológica"
-            else -> pantalla = "Inicio"
+            "Detalle" -> {
+                pantalla = "Guía metodológica"
+            }
+
+            else -> {
+                pantalla = "Inicio"
+            }
         }
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor =
+            MaterialTheme.colorScheme.background,
         topBar = {
             Surface(
-                color = MaterialTheme.colorScheme.surface,
+                color =
+                    MaterialTheme.colorScheme.surface,
                 tonalElevation = 3.dp
             ) {
                 Column {
                     Text(
                         text = "Tutor Virtual ESUCAR",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .titleLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                     )
 
                     Text(
-                        text = if (hayInternet) {
-                            "● Con conexión"
-                        } else {
-                            "● Sin conexión"
-                        },
-                        color = if (hayInternet) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
-                        style = MaterialTheme.typography.labelMedium,
+                        text =
+                            if (hayInternet) {
+                                "● Con conexión"
+                            } else {
+                                "● Sin conexión"
+                            },
+                        color =
+                            if (hayInternet) {
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary
+                            } else {
+                                MaterialTheme
+                                    .colorScheme
+                                    .error
+                            },
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelMedium,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -230,8 +268,14 @@ val scope = rememberCoroutineScope()
 
                     Text(
                         text = mensajeSincronizacion,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -239,9 +283,17 @@ val scope = rememberCoroutineScope()
                     )
 
                     Text(
-                        text = "Versión del contenido: $versionContenido",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text =
+                            "Versión del contenido: " +
+                                    versionContenido,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -249,9 +301,17 @@ val scope = rememberCoroutineScope()
                     )
 
                     Text(
-                        text = "Fecha de actualización: $fechaActualizacion",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text =
+                            "Fecha de actualización: " +
+                                    fechaActualizacion,
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurface,
                         modifier = Modifier.padding(
                             start = 20.dp,
                             bottom = 8.dp
@@ -273,15 +333,30 @@ val scope = rememberCoroutineScope()
                         Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Bienvenido al Tutor Virtual",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Bienvenido al Tutor Virtual",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .headlineSmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     Text(
-                        text = "Apoyo para Trabajo de Título I, II y III.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Apoyo para Trabajo de " +
+                                    "Título I, II y III.",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     listOf(
@@ -351,8 +426,9 @@ val scope = rememberCoroutineScope()
                     onVolver = {
                         pantalla = "Inicio"
                     },
-                    preguntasRemotas = contenidoActual
-                        ?.preguntasFrecuentes
+                    preguntasRemotas =
+                        contenidoActual
+                            ?.preguntasFrecuentes
                 )
             }
 
@@ -367,21 +443,36 @@ val scope = rememberCoroutineScope()
                 ) {
                     Text(
                         text = pantalla,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onBackground
+                        style =
+                            MaterialTheme
+                                .typography
+                                .headlineMedium,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     Text(
-                        text = "Módulo preparado para próximas actividades.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        text =
+                            "Módulo preparado para " +
+                                    "próximas actividades.",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
 
                     OutlinedButton(
                         onClick = {
                             pantalla = "Inicio"
                         },
-                        modifier = Modifier.heightIn(min = 48.dp)
+                        modifier =
+                            Modifier.heightIn(min = 48.dp)
                     ) {
                         Text("Volver al inicio")
                     }

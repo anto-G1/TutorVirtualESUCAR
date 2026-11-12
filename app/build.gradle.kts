@@ -64,6 +64,9 @@ dependencies {
         "androidx.datastore:datastore-preferences:1.1.7"
     )
     implementation(
+        "androidx.work:work-runtime-ktx:2.12.0"
+    )
+    implementation(
         "com.squareup.retrofit2:retrofit:2.11.0"
     )
     implementation(
