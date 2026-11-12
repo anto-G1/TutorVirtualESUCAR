@@ -40,10 +40,10 @@
     }
   ],
   "preguntasFrecuentes": [
-    {
+        {
       "id": 1,
+      "pregunta": "¿Qué es una cita bibliográfica?",
       "respuesta": "Para citar correctamente las fuentes, utiliza las normas APA y registra el autor, año de publicación y referencia bibliográfica. Esta información fue actualizada desde GitHub.",
-      "respuesta": "Es una referencia a una fuente utilizada en un trabajo académico.",
       "categoria": "Citación"
     },
     {
