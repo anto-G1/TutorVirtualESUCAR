@@ -31,7 +31,19 @@ import cl.duoc.tutorvirtual.ui.screens.HitosScreen
 import cl.duoc.tutorvirtual.data.model.Hito
 import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 import kotlinx.coroutines.launch
-import cl.duoc.tutorvirtual.ui.screens.FaqScreen
+import cl.duoc.tutorvirtual.ui.components.FaqScreen
+import cl.duoc.tutorvirtual.utils.NetworkUtils
+import androidx.compose.runtime.DisposableEffect
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.content.Context
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.graphics.Color
+import cl.duoc.tutorvirtual.data.remote.ContenidoRemoto
+import cl.duoc.tutorvirtual.data.remote.RetrofitClient
+import cl.duoc.tutorvirtual.data.repository.ContenidoRepository
 
 class MainActivity : ComponentActivity() {
 
@@ -51,18 +63,110 @@ fun TutorVirtualApp() {
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val contenidoRepository = remember(context) {
+        ContenidoRepository(
+            context = context.applicationContext,
+            api = RetrofitClient.api
+        )
+    }
+
+    var hayInternet by remember {
+        mutableStateOf(NetworkUtils.hayConexion(context))
+    }
+
+    DisposableEffect(context) {
+        val manager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE
+        ) as ConnectivityManager
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                hayInternet = NetworkUtils.hayConexion(context)
+            }
+
+            override fun onLost(network: Network) {
+                hayInternet = NetworkUtils.hayConexion(context)
+            }
+
+            override fun onCapabilitiesChanged(
+                network: Network,
+                capabilities: NetworkCapabilities
+            ) {
+                hayInternet = NetworkUtils.hayConexion(context)
+            }
+        }
+
+        manager.registerDefaultNetworkCallback(callback)
+
+        onDispose {
+            manager.unregisterNetworkCallback(callback)
+        }
+    }
+    var mensajeSincronizacion by remember {
+        mutableStateOf("Sin sincronizar")
+    }
+    var versionContenido by remember {
+        mutableIntStateOf(0)
+    }
+    var fechaActualizacion by remember {
+        mutableStateOf("No disponible")
+    }
+    var contenidoActual by remember {
+        mutableStateOf<ContenidoRemoto?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        val contenidoLocal = contenidoRepository.obtenerLocal()
+
+        contenidoActual = contenidoLocal
+        versionContenido = contenidoLocal.version
+        fechaActualizacion = contenidoLocal.fechaActualizacion
+    }
+
+    LaunchedEffect(hayInternet) {
+        if (hayInternet) {
+            mensajeSincronizacion = "Actualizando contenido..."
+
+            val resultado = contenidoRepository.sincronizar()
+
+
+            mensajeSincronizacion = if (resultado.isSuccess) {
+                contenidoActual = resultado.getOrThrow()
+                versionContenido = contenidoActual!!.version
+                fechaActualizacion = contenidoActual!!.fechaActualizacion
+                "Contenido sincronizado"
+            } else {
+                "Error al actualizar. Contenido local disponible."
+            }
+
+        } else {
+            mensajeSincronizacion = "Sin conexión. Contenido local disponible."
+        }
+    }
 
     val estadoDataStore = remember(context) {
         EstadoEntregableDataStore(context)
     }
+
     val hitosConEstado = HitosLocalDataSource.hitos.map { hito ->
+
+        val guiaActualizada = contenidoActual?.guias?.find {
+            it.id == hito.id
+        }
 
         val estadoGuardado by estadoDataStore
             .obtenerEstado(hito.id)
             .collectAsState(initial = hito.estado)
 
-        hito.copy(estado = estadoGuardado)
+        hito.copy(
+            titulo = guiaActualizada?.titulo ?: hito.titulo,
+            descripcion = guiaActualizada?.descripcion ?: hito.descripcion,
+            formatoRequerido = guiaActualizada?.formatoRequerido ?: hito.formatoRequerido,
+            fechaLimite = guiaActualizada?.fechaLimite ?: hito.fechaLimite,
+            estado = estadoGuardado
+        )
     }
+
 
     var pantalla by remember {
         mutableStateOf("Inicio")
@@ -87,20 +191,68 @@ fun TutorVirtualApp() {
 
 
     Scaffold(
+
         topBar = {
             Surface(
                 tonalElevation = 3.dp
             ) {
-                Text(
-                    text = "Tutor Virtual ESUCAR",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                )
+                Column {
+                    Text(
+                        text = "Tutor Virtual ESUCAR",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    )
+
+                    Text(
+                        text = if (hayInternet) "● Con conexión" else "● Sin conexión",
+                        color = if (hayInternet)
+                            Color(0xFF2E7D32)
+                        else
+                            Color(0xFFC62828),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            bottom = 8.dp
+                        )
+                    )
+
+                    Text(
+                        text = mensajeSincronizacion,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            bottom = 8.dp
+                        )
+                    )
+
+
+                    Text(
+                        text = "Versión del contenido: $versionContenido",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            bottom = 8.dp
+                        )
+                    )
+
+
+                    Text(
+                        text = "Fecha de actualización: $fechaActualizacion",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            bottom = 8.dp
+                        )
+                    )
+
+
+                }
             }
-        }
-    ) { padding ->
+        },
+
+        ) { padding ->
 
         when (pantalla) {
 
@@ -182,14 +334,17 @@ fun TutorVirtualApp() {
 
 
 
+
             "Preguntas frecuentes" -> {
                 FaqScreen(
                     modifier = Modifier.padding(padding),
                     onVolver = {
                         pantalla = "Inicio"
-                    }
+                    },
+                    preguntasRemotas = contenidoActual?.preguntasFrecuentes
                 )
             }
+
 
             else -> {
 

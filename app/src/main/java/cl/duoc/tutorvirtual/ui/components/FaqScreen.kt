@@ -7,12 +7,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cl.duoc.tutorvirtual.data.local.FaqLocalDataSource
+import cl.duoc.tutorvirtual.data.remote.FaqRemota
+
+
 
 @Composable
 fun FaqScreen(
     modifier: Modifier = Modifier,
-    onVolver: () -> Unit
-)  {
+    onVolver: () -> Unit,
+    preguntasRemotas: List<FaqRemota>? = null
+) {
+
+
+    val preguntasActualizadas = FaqLocalDataSource.preguntas.map { faq ->
+
+        val actualizacion = preguntasRemotas?.find {
+            it.id == faq.id
+        }
+
+        faq.copy(
+            pregunta = actualizacion?.pregunta ?: faq.pregunta,
+            respuesta = actualizacion?.respuesta ?: faq.respuesta,
+            categoria = actualizacion?.categoria ?: faq.categoria
+        )
+    }
+
+
 
     val categorias = listOf(
         "Citación",
@@ -33,6 +53,8 @@ fun FaqScreen(
             )
         }
 
+
+
         item {
             OutlinedButton(
                 onClick = onVolver
@@ -50,8 +72,9 @@ fun FaqScreen(
                 )
             }
 
+
             items(
-                FaqLocalDataSource.preguntas.filter {
+                preguntasActualizadas.filter {
                     it.categoria == categoria
                 }
             ) { faq ->
@@ -59,6 +82,7 @@ fun FaqScreen(
             }
 
 
-            }
+
+        }
         }
     }
