@@ -5,6 +5,7 @@ plugins {
 
 android {
     namespace = "cl.duoc.tutorvirtual"
+
     compileSdk {
         version = release(37)
     }
@@ -16,21 +17,28 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner =
+            "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                packageScope = setOf(
+                    "androidx.**",
+                    "kotlin.**",
+                    "kotlinx.**"
+                )
             }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
     }
@@ -45,15 +53,36 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    implementation(
+        "androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0"
+    )
+    implementation(
+        "androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0"
+    )
+    implementation(
+        "androidx.datastore:datastore-preferences:1.1.7"
+    )
+    implementation(
+        "com.squareup.retrofit2:retrofit:2.11.0"
+    )
+    implementation(
+        "com.squareup.retrofit2:converter-gson:2.11.0"
+    )
+
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    androidTestImplementation(
+        platform(libs.androidx.compose.bom)
+    )
+    androidTestImplementation(
+        libs.androidx.compose.ui.test.junit4
+    )
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
 
+    debugImplementation(
+        libs.androidx.compose.ui.test.manifest
+    )
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -27,11 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.tutorvirtual.data.local.EstadoEntregableDataStore
 import cl.duoc.tutorvirtual.data.local.HitosLocalDataSource
 import cl.duoc.tutorvirtual.data.model.Hito
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TutorVirtualApp() {
-    val scope = rememberCoroutineScope()
+val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val contenidoRepository = remember(context) {
@@ -80,22 +81,26 @@ fun TutorVirtualApp() {
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
 
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                hayInternet = NetworkUtils.hayConexion(context)
-            }
+        val callback =
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
 
-            override fun onLost(network: Network) {
-                hayInternet = NetworkUtils.hayConexion(context)
-            }
+                override fun onLost(network: Network) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
 
-            override fun onCapabilitiesChanged(
-                network: Network,
-                capabilities: NetworkCapabilities
-            ) {
-                hayInternet = NetworkUtils.hayConexion(context)
+                override fun onCapabilitiesChanged(
+                    network: Network,
+                    capabilities: NetworkCapabilities
+                ) {
+                    hayInternet =
+                        NetworkUtils.hayConexion(context)
+                }
             }
-        }
 
         manager.registerDefaultNetworkCallback(callback)
 
@@ -125,7 +130,8 @@ fun TutorVirtualApp() {
 
         contenidoActual = contenidoLocal
         versionContenido = contenidoLocal.version
-        fechaActualizacion = contenidoLocal.fechaActualizacion
+        fechaActualizacion =
+            contenidoLocal.fechaActualizacion
     }
 
     LaunchedEffect(hayInternet) {
@@ -143,7 +149,8 @@ fun TutorVirtualApp() {
                 "Error al actualizar. Contenido local disponible."
             }
         } else {
-            mensajeSincronizacion = "Sin conexión. Contenido local disponible."
+            mensajeSincronizacion =
+                "Sin conexión. Contenido local disponible."
         }
     }
 
@@ -262,7 +269,8 @@ fun TutorVirtualApp() {
                         .padding(padding)
                         .fillMaxSize()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
                         text = "Bienvenido al Tutor Virtual",
@@ -294,7 +302,8 @@ fun TutorVirtualApp() {
 
             "Guía metodológica" -> {
                 HitosScreen(
-                    modifier = Modifier.padding(padding),
+                    modifier =
+                        Modifier.padding(padding),
                     hitos = hitosConEstado,
                     onHitoClick = { hito ->
                         hitoSeleccionado = hito
@@ -305,31 +314,40 @@ fun TutorVirtualApp() {
 
             "Detalle" -> {
                 hitoSeleccionado?.let { hito ->
-                    val hitoActualizado = hitosConEstado.find {
-                        it.id == hito.id
-                    } ?: hito
+                    val hitoActualizado =
+                        hitosConEstado.find {
+                            it.id == hito.id
+                        } ?: hito
+
+                    val estadoViewModel:
+                            HitoEstadoViewModel = viewModel(
+                        key =
+                            "estado_hito_${hito.id}",
+                        factory =
+                            HitoEstadoViewModel.Factory(
+                                idHito = hito.id,
+                                dataStore =
+                                    estadoDataStore
+                            )
+                    )
 
                     HitoDetalleScreen(
                         hito = hitoActualizado,
+                        viewModel = estadoViewModel,
                         onVolver = {
-                            pantalla = "Guía metodológica"
+                            pantalla =
+                                "Guía metodológica"
                         },
-                        onCambiarEstado = { nuevoEstado ->
-                            scope.launch {
-                                estadoDataStore.guardarEstado(
-                                    hito.id,
-                                    nuevoEstado
-                                )
-                            }
-                        },
-                        modifier = Modifier.padding(padding)
+                        modifier =
+                            Modifier.padding(padding)
                     )
                 }
             }
 
             "Preguntas frecuentes" -> {
                 FaqScreen(
-                    modifier = Modifier.padding(padding),
+                    modifier =
+                        Modifier.padding(padding),
                     onVolver = {
                         pantalla = "Inicio"
                     },
@@ -344,7 +362,8 @@ fun TutorVirtualApp() {
                         .padding(padding)
                         .fillMaxSize()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
                         text = pantalla,
