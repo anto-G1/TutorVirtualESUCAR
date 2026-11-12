@@ -1,0 +1,62 @@
+
+{
+  "version": 1,
+  "fechaActualizacion": "2026-11-12",
+  "guias": [
+    {
+      "id": 1,
+      "titulo": "Planteamiento",
+      "descripcion": "Define el problema, los objetivos y el propósito del trabajo.",
+      "formatoRequerido": "Por definir",
+      "fechaLimite": "Por definir"
+    },
+    {
+      "id": 2,
+      "titulo": "Marco Teórico",
+      "descripcion": "Reúne antecedentes y fundamentos teóricos relacionados con el tema.",
+      "formatoRequerido": "Por definir",
+      "fechaLimite": "Por definir"
+    },
+    {
+      "id": 3,
+      "titulo": "Metodología",
+      "descripcion": "Define los métodos, técnicas y procedimientos de la investigación.",
+      "formatoRequerido": "Por definir",
+      "fechaLimite": "Por definir"
+    },
+    {
+      "id": 4,
+      "titulo": "Recogida de información",
+      "descripcion": "Permite obtener los datos necesarios para desarrollar la investigación.",
+      "formatoRequerido": "Por definir",
+      "fechaLimite": "Por definir"
+    },
+    {
+      "id": 5,
+      "titulo": "Análisis de resultados",
+      "descripcion": "Interpreta los resultados obtenidos y permite generar conclusiones.",
+      "formatoRequerido": "Por definir",
+      "fechaLimite": "Por definir"
+    }
+  ],
+  "preguntasFrecuentes": [
+    {
+      "id": 1,
+      "pregunta": "¿Qué es una cita bibliográfica?",
+      "respuesta": "Es una referencia a una fuente utilizada en un trabajo académico.",
+      "categoria": "Citación"
+    },
+    {
+      "id": 2,
+      "pregunta": "¿Qué es el planteamiento del problema?",
+      "respuesta": "Es la descripción de la situación que se desea investigar.",
+      "categoria": "Metodología"
+    },
+    {
+      "id": 3,
+      "pregunta": "¿Cómo se organiza un trabajo académico?",
+      "respuesta": "Generalmente incluye introducción, desarrollo, conclusiones y referencias.",
+      "categoria": "Formato"
+    }
+  ]
+}

@@ -16,10 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.tutorvirtual.data.local.HitosLocalDataSource
 import cl.duoc.tutorvirtual.ui.components.HitoCard
+import cl.duoc.tutorvirtual.data.model.Hito
 
 @Composable
 fun HitosScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hitos: List<Hito>,
+    onHitoClick: (Hito) -> Unit = {}
 ) {
 
     Column(
@@ -64,12 +67,15 @@ fun HitosScreen(
         ) {
 
             items(
-                items = HitosLocalDataSource.hitos,
+                items = hitos,
                 key = { hito -> hito.id }
             ) { hito ->
 
                 HitoCard(
-                    hito = hito
+                    hito = hito,
+                    onClick = {
+                        onHitoClick(hito)
+                    }
                 )
             }
         }
