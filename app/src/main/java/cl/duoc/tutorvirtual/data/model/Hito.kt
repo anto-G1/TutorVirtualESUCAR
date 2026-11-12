@@ -4,5 +4,7 @@ data class Hito(
     val id: Int,
     val titulo: String,
     val descripcion: String,
-    val estado: String
+    val estado: String,
+    val formatoRequerido: String = "Por definir",
+    val fechaLimite: String = "Por definir"
 )

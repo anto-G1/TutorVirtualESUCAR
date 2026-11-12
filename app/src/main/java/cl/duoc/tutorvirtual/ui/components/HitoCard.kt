@@ -22,11 +22,14 @@ import androidx.compose.ui.unit.dp
 import cl.duoc.tutorvirtual.data.model.Hito
 
 @Composable
+
 fun HitoCard(
     hito: Hito,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(

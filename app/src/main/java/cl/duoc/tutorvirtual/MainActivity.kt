@@ -23,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cl.duoc.tutorvirtual.ui.screens.HitosScreen
+import cl.duoc.tutorvirtual.data.model.Hito
+import cl.duoc.tutorvirtual.ui.screens.HitoDetalleScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -44,9 +46,23 @@ fun TutorVirtualApp() {
         mutableStateOf("Inicio")
     }
 
-    BackHandler(enabled = pantalla != "Inicio") {
-        pantalla = "Inicio"
+    var hitoSeleccionado by remember {
+        mutableStateOf<Hito?>(null)
     }
+
+
+
+    BackHandler(enabled = pantalla != "Inicio") {
+        when (pantalla) {
+            "Detalle" -> {
+                pantalla = "Guía metodológica"
+            }
+            else -> {
+                pantalla = "Inicio"
+            }
+        }
+    }
+
 
     Scaffold(
         topBar = {
@@ -107,9 +123,29 @@ fun TutorVirtualApp() {
             "Guía metodológica" -> {
 
                 HitosScreen(
-                    modifier = Modifier.padding(padding)
+                    modifier = Modifier.padding(padding),
+                    onHitoClick = { hito ->
+                        hitoSeleccionado = hito
+                        pantalla = "Detalle"
+                    }
                 )
             }
+
+
+
+            "Detalle" -> {
+                hitoSeleccionado?.let { hito ->
+                    HitoDetalleScreen(
+                        hito = hito,
+                        onVolver = {
+                            pantalla = "Guía metodológica"
+                        },
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+            }
+
+
 
             else -> {
 
