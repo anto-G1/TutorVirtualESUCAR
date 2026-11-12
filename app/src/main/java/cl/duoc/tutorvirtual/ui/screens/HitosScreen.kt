@@ -21,6 +21,7 @@ import cl.duoc.tutorvirtual.data.model.Hito
 @Composable
 fun HitosScreen(
     modifier: Modifier = Modifier,
+    hitos: List<Hito>,
     onHitoClick: (Hito) -> Unit = {}
 ) {
 
@@ -66,7 +67,7 @@ fun HitosScreen(
         ) {
 
             items(
-                items = HitosLocalDataSource.hitos,
+                items = hitos,
                 key = { hito -> hito.id }
             ) { hito ->
 

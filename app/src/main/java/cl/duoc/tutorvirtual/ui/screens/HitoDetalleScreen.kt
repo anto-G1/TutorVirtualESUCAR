@@ -13,7 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
-
+import androidx.compose.material3.OutlinedButton
+import cl.duoc.tutorvirtual.data.model.EstadoEntregable
 
 
 @Composable
@@ -21,6 +22,7 @@ import androidx.compose.material3.Button
 fun HitoDetalleScreen(
     hito: Hito,
     onVolver: () -> Unit,
+    onCambiarEstado: (EstadoEntregable) -> Unit,
     modifier: Modifier = Modifier
 )
  {
@@ -47,8 +49,31 @@ fun HitoDetalleScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+         Spacer(
+             modifier = Modifier.height(16.dp)
+         )
 
-        Spacer(
+         Text(
+             text = "Estado: ${hito.estado.etiqueta}",
+             style = MaterialTheme.typography.titleMedium,
+             color = MaterialTheme.colorScheme.primary
+         )
+
+
+         Spacer(modifier = Modifier.height(12.dp))
+
+         EstadoEntregable.entries.forEach { estado ->
+             OutlinedButton(
+                 onClick = {
+                     onCambiarEstado(estado)
+                 }
+             ) {
+                 Text(text = estado.etiqueta)
+             }
+         }
+
+
+         Spacer(
             modifier = Modifier.height(24.dp)
         )
 

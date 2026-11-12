@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cl.duoc.tutorvirtual.data.model.Hito
+import androidx.compose.ui.graphics.Color
+import cl.duoc.tutorvirtual.data.model.EstadoEntregable
 
 @Composable
 
@@ -28,6 +30,12 @@ fun HitoCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val colorEstado = when (hito.estado) {
+        EstadoEntregable.POR_INICIAR -> Color(0xFFE8DEF8)
+        EstadoEntregable.EN_DESARROLLO -> Color(0xFFBBDEFB)
+        EstadoEntregable.ENVIADO -> Color(0xFFFFE0B2)
+        EstadoEntregable.APROBADO -> Color(0xFFC8E6C9)
+    }
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -90,17 +98,17 @@ fun HitoCard(
 
             Surface(
                 shape = RoundedCornerShape(50.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
+                color = colorEstado
             ) {
                 Text(
-                    text = "●  ${hito.estado}",
+                    text = "●  ${hito.estado.etiqueta}",
                     modifier = Modifier.padding(
                         horizontal = 12.dp,
                         vertical = 7.dp
                     ),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = Color(0xFF202020)
                 )
             }
         }
