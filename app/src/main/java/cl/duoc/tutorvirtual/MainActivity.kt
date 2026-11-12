@@ -62,7 +62,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TutorVirtualApp() {
-val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val contenidoRepository = remember(context) {
