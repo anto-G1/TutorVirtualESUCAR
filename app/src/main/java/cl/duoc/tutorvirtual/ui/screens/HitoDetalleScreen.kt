@@ -54,7 +54,8 @@ import cl.duoc.tutorvirtual.ui.viewmodel.HitoEstadoViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
+import cl.duoc.tutorvirtual.ui.components.GuiaPasoAPaso
+import cl.duoc.tutorvirtual.ui.components.RespaldoHitoTools
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HitoDetalleScreen(
@@ -217,6 +218,14 @@ fun HitoDetalleScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
+        GuiaPasoAPaso(
+            hito = hito
+        )
+        // Cámara y archivos del dispositivo
+        RespaldoHitoTools(
+            hitoId = hito.id
+        )
+
         Text(
             text = "Estado del entregable",
             style = MaterialTheme.typography.titleMedium,
@@ -255,17 +264,22 @@ fun HitoDetalleScreen(
                     menuAbierto = false
                 }
             ) {
-                EstadoEntregable.entries.forEach { estado ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(estado.etiqueta)
-                        },
-                        onClick = {
-                            menuAbierto = false
-                            viewModel.seleccionarEstado(estado)
-                        }
-                    )
-                }
+
+                EstadoEntregable.entries
+                    .filter { it != EstadoEntregable.APROBADO }
+                    .forEach { estado ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(estado.etiqueta)
+                            },
+                            onClick = {
+                                menuAbierto = false
+                                viewModel.seleccionarEstado(
+                                    nuevoEstado = estado
+                                )
+                            }
+                        )
+                    }
             }
         }
 
