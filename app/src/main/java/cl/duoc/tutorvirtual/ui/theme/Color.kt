@@ -1,22 +1,21 @@
+
 package cl.duoc.tutorvirtual.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val AzulPrincipal = Color(0xFF123B66)
-val SobreAzul = Color(0xFFFFFFFF)
-val AzulSuave = Color(0xFFD6E4F0)
-val SobreAzulSuave = Color(0xFF0B243D)
+// Identidad visual ESUCAR
+val VerdeInstitucional = Color(0xFF017328)
+val VerdeOscuro = Color(0xFF1B4332)
+val VerdeSalvia = Color(0xFFA3B18A)
+val VerdeSuave = Color(0xFFE2EDDF)
+val VerdeMuyClaro = Color(0xFFF1F5F1)
 
-val GrisSecundario = Color(0xFF3D5266)
-val GrisSuave = Color(0xFFDDE6EE)
+val Blanco = Color(0xFFFFFFFF)
+val NegroVerdoso = Color(0xFF212721)
+val TextoSecundario = Color(0xFF43564B)
+val BordeVerde = Color(0xFF899E8C)
 
-val FondoClaro = Color(0xFFF7F9FC)
-val SuperficieClara = Color(0xFFFFFFFF)
-val TextoOscuro = Color(0xFF111827)
-val TextoSecundario = Color(0xFF374151)
-val Borde = Color(0xFF667085)
-
-val FondoOscuro = Color(0xFF0F1720)
-val SuperficieOscura = Color(0xFF111B24)
-val TextoClaro = Color(0xFFF3F4F6)
-val AzulClaro = Color(0xFFAFCBE5)
+// Tema oscuro
+val FondoOscuro = Color(0xFF101C16)
+val SuperficieOscura = Color(0xFF1A2C22)
+val VerdeClaro = Color(0xFFB8D8B6)
