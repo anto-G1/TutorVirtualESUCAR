@@ -40,13 +40,23 @@ class HitoEstadoViewModel(
     }
 
     fun seleccionarEstado(
-        nuevoEstado: EstadoEntregable
+    nuevoEstado: EstadoEntregable
     ) {
+        // Impedir que el estudiante apruebe entregables
+        if (nuevoEstado == EstadoEntregable.APROBADO) {
+            _uiState.update {
+                it.copy(
+                    mensaje = "Solo el profesor guía puede aprobar entregables."
+                )
+            }
+            return
+        }
+
+        // Conservar la validación que ya existía
         if (nuevoEstado == _uiState.value.estado) {
             _uiState.update {
                 it.copy(
-                    mensaje =
-                        "El estado ya estaba seleccionado."
+                    mensaje = "El estado ya estaba seleccionado."
                 )
             }
             return
